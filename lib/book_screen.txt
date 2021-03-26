@@ -1,0 +1,18 @@
+import "package:flutter/material.dart";
+import "package:digital_talking_book_recorder/widgets.dart";
+
+class BookScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Digital audio book recorder"),
+      ),
+      body: BookCardList(),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => null,
+      ),
+    );
+  }
+}
