@@ -1,113 +1,264 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+import "package:digital_talking_book_recorder/audio_player.dart";
+
+class AudioRecorder extends StatefulWidget {
+  final String path;
+  final VoidCallback onStop;
+
+  const AudioRecorder({required this.path, required this.onStop});
+
+  @override
+  _AudioRecorderState createState() => _AudioRecorderState();
+}
+
+class _AudioRecorderState extends State<AudioRecorder> {
+  bool _isRecording = false;
+  bool _isPaused = false;
+  int _recordDuration = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    _isRecording = false;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _buildRecordStopControl(),
+              const SizedBox(width: 20),
+              _buildPauseResumeControl(),
+              const SizedBox(width: 20),
+              _buildText(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecordStopControl() {
+    late Icon icon;
+    late Color color;
+
+    if (_isRecording || _isPaused) {
+      icon =
+          Icon(Icons.stop, semanticLabel: "stop", color: Colors.red, size: 30);
+      color = Colors.red.withOpacity(0.1);
+    } else {
+      final theme = Theme.of(context);
+      icon = Icon(Icons.mic,
+          semanticLabel: "record", color: theme.primaryColor, size: 30);
+      color = theme.primaryColor.withOpacity(0.1);
+    }
+
+    return ClipOval(
+      child: Material(
+        color: color,
+        child: InkWell(
+          child: SizedBox(width: 56, height: 56, child: icon),
+          onTap: () {
+            _isRecording ? _stop() : _start();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPauseResumeControl() {
+    if (!_isRecording && !_isPaused) {
+      return const SizedBox.shrink();
+    }
+
+    late Icon icon;
+    late Color color;
+
+    if (!_isPaused) {
+      icon = Icon(Icons.pause,
+          semanticLabel: "pause", color: Colors.red, size: 30);
+      color = Colors.red.withOpacity(0.1);
+    } else {
+      final theme = Theme.of(context);
+      icon = Icon(Icons.play_arrow, color: Colors.red, size: 30);
+      color = theme.primaryColor.withOpacity(0.1);
+    }
+
+    return ClipOval(
+      child: Material(
+        color: color,
+        child: InkWell(
+          child: SizedBox(width: 56, height: 56, child: icon),
+          onTap: () {
+            _isPaused ? _resume() : _pause();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildText() {
+    if (_isRecording || _isPaused) {
+      return _buildTimer();
+    }
+
+    return Text("Waiting to record");
+  }
+
+  Widget _buildTimer() {
+    final String minutes = _formatNumber(_recordDuration ~/ 60);
+    final String seconds = _formatNumber(_recordDuration % 60);
+
+    return Text(
+      '$minutes : $seconds',
+      style: TextStyle(color: Colors.red),
+    );
+  }
+
+  String _formatNumber(int number) {
+    String numberStr = number.toString();
+    if (number < 10) {
+      numberStr = '0' + numberStr;
+    }
+
+    return numberStr;
+  }
+
+  Future<void> _start() async {
+    try {
+      if (await Record.hasPermission()) {
+        await Record.start(path: widget.path);
+
+        bool isRecording = await Record.isRecording();
+        setState(() {
+          _isRecording = isRecording;
+          _recordDuration = 0;
+        });
+
+        _startTimer();
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _stop() async {
+    _timer?.cancel();
+    await Record.stop();
+
+    setState(() => _isRecording = false);
+
+    widget.onStop();
+  }
+
+  Future<void> _pause() async {
+    _timer?.cancel();
+    await Record.pause();
+
+    setState(() => _isPaused = true);
+  }
+
+  Future<void> _resume() async {
+    _startTimer();
+    await Record.resume();
+
+    setState(() => _isPaused = false);
+  }
+
+  void _startTimer() {
+    const tick = const Duration(seconds: 1);
+
+    _timer?.cancel();
+
+    _timer = Timer.periodic(tick, (Timer t) {
+      setState(() => _recordDuration++);
+    });
+  }
+}
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool showPlayer = false;
+  String? path;
+
+  @override
+  void initState() {
+    showPlayer = false;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String? title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title!),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      showSemanticsDebugger: true,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("digitalking book"),
+        ),
+        body: Center(
+          child: FutureBuilder<String>(
+            future: getPath(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (showPlayer) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 25),
+                    child: AudioPlayer(
+                      path: snapshot.data!,
+                      onDelete: () {
+                        setState(() => showPlayer = false);
+                      },
+                    ),
+                  );
+                } else {
+                  return AudioRecorder(
+                    path: snapshot.data!,
+                    onStop: () {
+                      setState(() => showPlayer = true);
+                    },
+                  );
+                }
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<String> getPath() async {
+    if (path == null) {
+      final dir = await getApplicationDocumentsDirectory();
+      path = dir.path +
+          '/' +
+          DateTime.now().millisecondsSinceEpoch.toString() +
+          '.m4a';
+    }
+    return path!;
   }
 }
