@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import "dart:io";
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:digital_talking_book_recorder/audio_player.dart";
@@ -14,13 +14,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool showPlayer = false;
   String? path;
 
   @override
   void initState() {
-    showPlayer = false;
     super.initState();
+    Directory str = Directory("/storage/emulated/0/digitalTalkingBookRecorder");
+    if (!str.existsSync()) {
+      str.create();
+    }
   }
 
   @override
