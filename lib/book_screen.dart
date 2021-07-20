@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:digital_talking_book_recorder/widgets.dart";
-import "package:digital_talking_book_recorder/newBookScreen.dart";
 
 class BookScreen extends StatefulWidget {
   @override

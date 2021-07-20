@@ -1,6 +1,14 @@
 import "package:flutter/material.dart";
 
-class BookCard extends StatelessWidget {
+class BookCard extends StatefulWidget {
+  final String bookName;
+
+  BookCard({required this.bookName});
+  @override
+  _BookCardState createState() => _BookCardState();
+}
+
+class _BookCardState extends State<BookCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -9,20 +17,12 @@ class BookCard extends StatelessWidget {
         children: [
           ListTile(
             leading: Icon(Icons.book),
-            title: Text('book name '),
+            title: Text(widget.bookName),
             subtitle: Text(
               'status ',
               style: TextStyle(color: Colors.black.withOpacity(0.6)),
             ),
           ),
-          /*
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
-              style: TextStyle(color: Colors.black.withOpacity(0.6)),
-            ),
-          ), */
           ButtonBar(
             alignment: MainAxisAlignment.start,
             children: [
@@ -46,9 +46,24 @@ class BookCard extends StatelessWidget {
   }
 }
 
-class BookCardList extends StatelessWidget {
+class BookCardList extends StatefulWidget {
+  @override
+  _BookCardListState createState() => _BookCardListState();
+}
+
+class _BookCardListState extends State<BookCardList> {
+  List<BookCard> books = [
+    BookCard(
+      bookName: "a",
+    ),
+    BookCard(
+      bookName: "b",
+    )
+  ];
   @override
   Widget build(BuildContext context) {
-    return BookCard();
+    return ListView(
+      children: books,
+    );
   }
 }
