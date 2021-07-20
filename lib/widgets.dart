@@ -8,20 +8,21 @@ class BookCard extends StatelessWidget {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.arrow_drop_down_circle),
-            title: Text('Card title 1'),
+            leading: Icon(Icons.book),
+            title: Text('book name '),
             subtitle: Text(
-              'Secondary Text',
+              'status ',
               style: TextStyle(color: Colors.black.withOpacity(0.6)),
             ),
           ),
+          /*
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
               'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
               style: TextStyle(color: Colors.black.withOpacity(0.6)),
             ),
-          ),
+          ), */
           ButtonBar(
             alignment: MainAxisAlignment.start,
             children: [
@@ -29,13 +30,13 @@ class BookCard extends StatelessWidget {
                 onPressed: () {
                   // Perform some action
                 },
-                child: Text('ACTION 1'),
+                child: Text('resume recording'),
               ),
               TextButton(
                 onPressed: () {
                   // Perform some action
                 },
-                child: Text('ACTION 2'),
+                child: Text('mark as  finished'),
               ),
             ],
           ),
@@ -44,31 +45,6 @@ class BookCard extends StatelessWidget {
     );
   }
 }
-/*
-class BookCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        children: [
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(),
-            title: Text("book name"),
-            subtitle: Text("book status"),
-          ),
-          //ButtonBar(
-//            children: [
-          //IconButton(
-          //icon: Icon(Icons.record_voice_over), onPressed: () => null)
-          //],
-          //)
-        ],
-      ),
-    );
-  }
-}
-*/
 
 class BookCardList extends StatelessWidget {
   @override

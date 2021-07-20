@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"dart.sdkPath": "C:\\tools\\flutter\\bin\\cache\\dart-sdk"
+	}
+}
