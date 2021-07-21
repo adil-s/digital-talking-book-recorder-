@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:path/path.dart" as path;
 
 class BookCard extends StatefulWidget {
   final String bookName;
@@ -47,23 +48,35 @@ class _BookCardState extends State<BookCard> {
 }
 
 class BookCardList extends StatefulWidget {
+  final List<String> bookPaths;
+  BookCardList({required this.bookPaths});
   @override
   _BookCardListState createState() => _BookCardListState();
 }
 
 class _BookCardListState extends State<BookCardList> {
-  List<BookCard> books = [
-    BookCard(
-      bookName: "a",
-    ),
-    BookCard(
-      bookName: "b",
-    )
-  ];
+  List<BookCard> books = [];
+
+  @override
+  void initState() {
+    super.initState();
+    for (var p in widget.bookPaths) {
+      books.add(BookCard(
+        bookName: path.basename(p),
+      ));
+      print(path.basename(p));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: books,
+    return ListView.builder(
+      itemCount: widget.bookPaths.length,
+      itemBuilder: (context, index) {
+        return BookCard(
+          bookName: path.basename(widget.bookPaths[index]),
+        );
+      },
     );
   }
 }

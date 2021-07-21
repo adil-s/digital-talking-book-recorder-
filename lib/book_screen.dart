@@ -1,5 +1,7 @@
+import "dart:io";
 import "package:flutter/material.dart";
 import "package:digital_talking_book_recorder/widgets.dart";
+import "package:path/path.dart" as path;
 
 class BookScreen extends StatefulWidget {
   @override
@@ -8,6 +10,20 @@ class BookScreen extends StatefulWidget {
 
 class _BookScreenState extends State<BookScreen> {
   TextEditingController _textFieldController = TextEditingController();
+  List<String> bookDirs = ["no"];
+  Directory appDir = Directory("/storage/emulated/0/digital_talking_books");
+
+  List<String>? _getBookDirs() {
+    bookDirs = [];
+    var f = () {
+      for (var d in appDir.listSync()) {
+        print(d.path);
+        bookDirs.add(d.path);
+      }
+    };
+    f();
+    return bookDirs;
+  }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
     return showDialog(
@@ -22,7 +38,7 @@ class _BookScreenState extends State<BookScreen> {
                 });
               },
               controller: _textFieldController,
-              decoration: InputDecoration(hintText: "Text Field in Dialog"),
+              decoration: InputDecoration(hintText: "book name"),
             ),
             actions: <Widget>[
               TextButton(
@@ -37,8 +53,10 @@ class _BookScreenState extends State<BookScreen> {
                 child: Text('OK'),
                 onPressed: () {
                   setState(() {
-                    codeDialog = valueText;
+                    userInput = valueText;
                     Navigator.pop(context);
+                    var newDirPath = path.join(appDir.path, userInput);
+                    Directory(newDirPath).createSync();
                   });
                 },
               ),
@@ -47,7 +65,7 @@ class _BookScreenState extends State<BookScreen> {
         });
   }
 
-  String? codeDialog;
+  String? userInput;
   String? valueText;
 
   @override
@@ -56,7 +74,9 @@ class _BookScreenState extends State<BookScreen> {
       appBar: AppBar(
         title: Text("Digital audio book recorder"),
       ),
-      body: BookCardList(),
+      body: BookCardList(
+        bookPaths: _getBookDirs() != null ? bookDirs : [" no "],
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         tooltip: " New book",

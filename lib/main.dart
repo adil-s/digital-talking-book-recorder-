@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import "package:digital_talking_book_recorder/book_screen.dart";
-import "package:digital_talking_book_recorder/audio_player.dart";
+import "dart:io";
 
-void main() {
+Future<void> main() async {
   runApp(MyApp());
+  var appDir = Directory("/storage/emulated/0/digital_talking_books");
+  if (!await appDir.exists()) {
+    appDir.create();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -14,7 +18,6 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         '/': (context) => BookScreen(),
-        "/newBook": (context) => AudioPlayer(path: "/storage/emulated/0")
       },
       title: 'Flutter Demo',
       theme: ThemeData(
