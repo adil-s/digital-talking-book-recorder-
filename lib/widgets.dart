@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:path/path.dart" as path;
+import "package:digital_talking_book_recorder/chapter_screen.dart";
 
 class BookCard extends StatefulWidget {
   final String bookName;
@@ -17,6 +18,16 @@ class _BookCardState extends State<BookCard> {
       child: Column(
         children: [
           ListTile(
+            onTap: () {
+              // Within the `FirstRoute` widget
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ChapterScreen(
+                          bookName: widget.bookName,
+                        )),
+              );
+            },
             leading: Icon(Icons.book),
             title: Text(widget.bookName),
             subtitle: Text(
